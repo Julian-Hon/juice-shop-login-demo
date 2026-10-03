@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Juice Shop Login Demo</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-card {
+      width: min(92%, 420px);
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+    }
+
+    h1 {
+      margin-top: 0;
+      text-align: center;
+      color: #5b2c83;
+    }
+
+    .field {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.4rem;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #bbb;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 5px;
+      background: #5b2c83;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #472266;
+    }
+
+    #message {
+      margin-top: 1rem;
+      min-height: 1.25rem;
+      text-align: center;
+    }
+
+    .error { color: #b00020; }
+    .success { color: #1b7f3a; }
+  </style>
+</head>
+<body>
+  <main class="login-card">
+    <h1>Login</h1>
+
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="email" />
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" />
+      </div>
+
+      <button type="submit">Log in</button>
+      <p id="message" aria-live="polite"></p>
+    </form>
+  </main>
+
+  <script>
+    const form = document.getElementById("loginForm");
+    const message = document.getElementById("message");
+
+    function validateLogin(email, password) {
+      if (!email || !password) {
+        return "Email and password are required.";
+      }
+
+      if (!email.includes("@")) {
+        return "Email must contain @.";
+      }
+
+      if (password.length < 8) {
+        return "Password must be at least 8 characters long.";
+      }
+
+      return null;
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      const validationError = validateLogin(email, password);
+
+      if (validationError) {
+        message.className = "error";
+        message.textContent = validationError;
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        message.className = response.ok ? "success" : "error";
+        message.textContent = data.message;
+      } catch (error) {
+        message.className = "error";
+        message.textContent = "Unable to reach the server.";
+      }
+    });
+  </script>
+</body>
+</html>
